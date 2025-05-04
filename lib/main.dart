@@ -12,19 +12,25 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
             appBar: AppBar(
-              backgroundColor: Colors.purple,
-              title: Text('앱임',
-                style: TextStyle(
-                  color: Colors.white
-                ),
-              ),
+              leadingWidth: 100,
+               leading: Center(child:
+               Row(
+                 children: [
+                   Text("금호동3가", style: TextStyle(fontWeight: FontWeight.bold),),
+                   Icon(Icons.expand_more)
+                 ],
+               )
+               ),
+              actions: [
+                Icon(Icons.search),
+                Icon(Icons.format_align_justify),
+                Icon(Icons.alarm)
+              ],
             ),
-        body: Column(
-          children: [
-            Text('안녕')
-          ],
+        
+        body: SizedBox(
+          child: TextButton(onPressed: (){}, child: Text('안뇽') ),
         ),
-
 
 
 bottomNavigationBar: BottomNavigationBar(
