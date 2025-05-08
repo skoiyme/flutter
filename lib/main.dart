@@ -1,9 +1,67 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const MyApp2());
 }
 
+
+// 메모장 앱
+class MyApp2 extends StatelessWidget {
+  const MyApp2({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+
+    return MaterialApp(
+      home: MyMemoAppPage()
+      );
+  }
+}
+
+
+class MyMemoAppPage extends StatefulWidget {
+  const MyMemoAppPage({super.key});
+
+  @override
+  State<MyMemoAppPage> createState() => _MyMemoAppPageState();
+}
+
+class _MyMemoAppPageState extends State<MyMemoAppPage> {
+  List<String> items = ['1','2','3'];
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: Text('메모장'),
+          backgroundColor: Colors.lightGreenAccent,
+          actions: [
+            IconButton(onPressed: (){
+              setState(() {
+                items.add('new items');
+                print(items);
+              });
+            }, icon: Icon(Icons.create),)
+          ],
+        ),
+        body: ListView.builder(itemCount: items.length, itemBuilder: (context, index) {
+          return ListTile(
+            title: Text(items[index]),
+            tileColor: Colors.amber,
+            trailing: IconButton(onPressed: (){
+              setState(() {
+                items.removeAt(index);
+                print(items);
+              });
+            }, icon: Icon(Icons.delete)),
+          );
+        }));
+  }
+}
+
+
+
+
+// 중고거래 디자인
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override
