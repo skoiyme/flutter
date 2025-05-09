@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'models/memo_data.dart';
 
 void main() {
   runApp(const MyApp2());
@@ -27,7 +28,12 @@ class MyMemoAppPage extends StatefulWidget {
 }
 
 class _MyMemoAppPageState extends State<MyMemoAppPage> {
-  List<String> items = ['1','2','3'];
+  List<MemoData> items = [
+    MemoData(content: 'Momo 1', createAt: DateTime(2022, 1, 31)),
+    MemoData(content: 'Momo 2', createAt: DateTime(2022, 2, 31)),
+    MemoData(content: 'Momo 3', createAt: DateTime(2022, 3, 31)),
+    MemoData(content: 'Momo 4', createAt: DateTime(2022, 4, 31)),
+  ];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,27 +43,56 @@ class _MyMemoAppPageState extends State<MyMemoAppPage> {
           actions: [
             IconButton(onPressed: (){
               setState(() {
-                items.add('new items');
+                items.add(MemoData(content: 'new item', createAt: DateTime.now()));
                 print(items);
               });
             }, icon: Icon(Icons.create),)
           ],
         ),
-        body: ListView.builder(itemCount: items.length, itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(items[index]),
-            tileColor: Colors.amber,
-            trailing: IconButton(onPressed: (){
+        body: Column(
+          children: [
+            CostomListView(items: items, onDelete: (index){
+              setState(() {
+                items.removeAt(index);
+                print(items);
+
+              });
+            },
+            ),
+            CostomListView(items: items, onDelete: (index){
               setState(() {
                 items.removeAt(index);
                 print(items);
               });
-            }, icon: Icon(Icons.delete)),
-          );
-        }));
+            },
+            ),
+          ],
+        )
+
+    );
   }
 }
 
+class CostomListView extends StatelessWidget {
+  final List<MemoData> items;
+  final Function(int) onDelete;
+  const CostomListView({super.key, required this.items, required this.onDelete});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(physics: NeverScrollableScrollPhysics(), shrinkWrap: true, itemCount: items.length, itemBuilder: (context, index) {
+      return ListTile(
+        title: Text(items[index].content),
+        subtitle: Text('${items[index].createAt}'),
+        tileColor: Colors.amber,
+        trailing: IconButton(onPressed: (){
+          onDelete(index);
+
+        }, icon: Icon(Icons.delete)),
+      );
+    });
+  }
+}
 
 
 
