@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'models/memo_data.dart';
+import 'screen/memo_input_page.dart';
 
 void main() {
   runApp(const MyApp2());
@@ -41,11 +42,16 @@ class _MyMemoAppPageState extends State<MyMemoAppPage> {
           title: Text('메모장'),
           backgroundColor: Colors.lightGreenAccent,
           actions: [
-            IconButton(onPressed: (){
-              setState(() {
-                items.add(MemoData(content: 'new item', createAt: DateTime.now()));
-                print(items);
-              });
+            IconButton(
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => MemoInputPage())).then((value) {
+                  if(!value.isEmpty){
+                    setState(() {
+                      items.add(MemoData(content: value, createAt: DateTime.now()));
+                      print(items);
+                    });
+                  }
+                });
             }, icon: Icon(Icons.create),)
           ],
         ),
