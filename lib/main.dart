@@ -30,9 +30,9 @@ class MyMemoAppPage extends StatefulWidget {
 class _MyMemoAppPageState extends State<MyMemoAppPage> {
   List<MemoData> items = [
     MemoData(content: 'Momo 1', createAt: DateTime(2022, 1, 31)),
-    MemoData(content: 'Momo 2', createAt: DateTime(2022, 2, 31)),
-    MemoData(content: 'Momo 3', createAt: DateTime(2022, 3, 31)),
-    MemoData(content: 'Momo 4', createAt: DateTime(2022, 4, 31)),
+    MemoData(content: 'Momo 2', createAt: DateTime(2023, 2, 31)),
+    MemoData(content: 'Momo 3', createAt: DateTime(2024, 3, 31)),
+    MemoData(content: 'Momo 4', createAt: DateTime(2025, 4, 31)),
   ];
   @override
   Widget build(BuildContext context) {
@@ -49,44 +49,64 @@ class _MyMemoAppPageState extends State<MyMemoAppPage> {
             }, icon: Icon(Icons.create),)
           ],
         ),
-        body: Column(
-          children: [
-            CostomListView(items: items, onDelete: (index){
-              setState(() {
-                items.removeAt(index);
-                print(items);
-
-              });
-            },
+        body: ListView(
+          children: groupMemoDataByYear(items).entries.map((entry){
+            return
+                Column(
+                  children: [
+                    Padding(padding: EdgeInsets.all(10), child: Text('${entry.key}',
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
             ),
-            CostomListView(items: items, onDelete: (index){
-              setState(() {
-                items.removeAt(index);
-                print(items);
-              });
-            },
-            ),
-          ],
-        )
 
-    );
+
+                    ),
+                  CostomListView(items: entry.value, onDelete: (customItem){
+                  setState(() {
+                    items.remove(customItem);
+                    print(items);
+
+                  });
+                },
+                )
+                  ],
+                );
+
+          }).toList(),
+        ));
   }
+
+  Map<int, List<MemoData>> groupMemoDataByYear(List<MemoData> items) {
+
+    Map<int, List<MemoData>> memoByYear = {};
+
+    for(var item in items){
+      int year = item.createAt.year;
+
+      if(!memoByYear.containsKey(year)){
+        memoByYear[year] = [];
+      }
+      memoByYear[year]?.add(item);
+    }
+    return memoByYear;
+  }
+
 }
 
 class CostomListView extends StatelessWidget {
   final List<MemoData> items;
-  final Function(int) onDelete;
+  final Function(MemoData) onDelete;
   const CostomListView({super.key, required this.items, required this.onDelete});
 
   @override
   Widget build(BuildContext context) {
     return ListView.builder(physics: NeverScrollableScrollPhysics(), shrinkWrap: true, itemCount: items.length, itemBuilder: (context, index) {
+      var customItem = items[index];
       return ListTile(
         title: Text(items[index].content),
         subtitle: Text('${items[index].createAt}'),
         tileColor: Colors.amber,
         trailing: IconButton(onPressed: (){
-          onDelete(index);
+          onDelete(customItem);
 
         }, icon: Icon(Icons.delete)),
       );
@@ -94,7 +114,20 @@ class CostomListView extends StatelessWidget {
   }
 }
 
+Map<int, List<MemoData>> groupMemoDataByYear(List<MemoData> items) {
 
+  Map<int, List<MemoData>> memoByYear = {};
+
+  for(var item in items){
+    int year = item.createAt.year;
+
+    if(!memoByYear.containsKey(year)){
+      memoByYear[year] = [];
+    }
+    memoByYear[year]?.add(item);
+  }
+  return memoByYear;
+}
 
 // 중고거래 디자인
 class MyApp extends StatelessWidget {
