@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fultter_study/database/data_helper.dart';
 import 'models/memo_data.dart';
 import 'screen/memo_input_page.dart';
 
@@ -29,12 +30,16 @@ class MyMemoAppPage extends StatefulWidget {
 }
 
 class _MyMemoAppPageState extends State<MyMemoAppPage> {
-  List<MemoData> items = [
-    MemoData(content: 'Momo 1', createAt: DateTime(2022, 1, 31)),
-    MemoData(content: 'Momo 2', createAt: DateTime(2023, 2, 31)),
-    MemoData(content: 'Momo 3', createAt: DateTime(2024, 3, 31)),
-    MemoData(content: 'Momo 4', createAt: DateTime(2025, 4, 31)),
-  ];
+DatabaseHelper dbHelper = DatabaseHelper();
+late Future<List<MemoData>> memos;
+
+@override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    memos = dbHelper.getMemos();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,38 +52,51 @@ class _MyMemoAppPageState extends State<MyMemoAppPage> {
                 Navigator.push(context, MaterialPageRoute(builder: (context) => MemoInputPage())).then((value) {
                   if(!value.isEmpty){
                     setState(() {
-                      items.add(MemoData(content: value, createAt: DateTime.now()));
-                      print(items);
+                      dbHelper.insertMemo(
+                          MemoData(content: value, createAt: DateTime.now()));
+                      memos = dbHelper.getMemos();
                     });
                   }
                 });
             }, icon: Icon(Icons.create),)
           ],
         ),
-        body: ListView(
-          children: groupMemoDataByYear(items).entries.map((entry){
-            return
-                Column(
+        body: FutureBuilder<List<MemoData>>(
+          future: memos,
+          builder: (context, snapshot) {
+            var items = snapshot.data ?? [];
+            return ListView(
+              children: groupMemoDataByYear(items).entries.map((entry) {
+                return Column(
                   children: [
-                    Padding(padding: EdgeInsets.all(10), child: Text('${entry.key}',
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-            ),
-
-
+                    Padding(
+                      padding: EdgeInsets.all(10),
+                      child: Text(
+                        '${entry.key}',
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                      ),
                     ),
-                  CostomListView(items: entry.value, onDelete: (customItem){
-                  setState(() {
-                    items.remove(customItem);
-                    print(items);
-
-                  });
-                },
-                )
+                    CustomListView(
+                      items: entry.value,
+                      onDelete: (customId) {
+                        setState(() {
+                          dbHelper.deleteMemo(customId);
+                          memos = dbHelper.getMemos();
+                        });
+                      },
+                      onUpdate: (customMemo){
+                        setState(() {
+                          dbHelper.updateMemo(customMemo);
+                          memos = dbHelper.getMemos();
+                        });
+                      },
+                    ),
                   ],
                 );
-
-          }).toList(),
-        ));
+              }).toList(),
+            );
+          }
+          ));
   }
 
   Map<int, List<MemoData>> groupMemoDataByYear(List<MemoData> items) {
@@ -98,23 +116,37 @@ class _MyMemoAppPageState extends State<MyMemoAppPage> {
 
 }
 
-class CostomListView extends StatelessWidget {
+class CustomListView extends StatelessWidget {
   final List<MemoData> items;
-  final Function(MemoData) onDelete;
-  const CostomListView({super.key, required this.items, required this.onDelete});
+  final Function(int) onDelete;
+  final Function(MemoData) onUpdate;
+
+  const CustomListView({super.key, required this.items, required this.onDelete, required this.onUpdate});
 
   @override
   Widget build(BuildContext context) {
     return ListView.builder(physics: NeverScrollableScrollPhysics(), shrinkWrap: true, itemCount: items.length, itemBuilder: (context, index) {
-      var customItem = items[index];
+
       return ListTile(
         title: Text(items[index].content),
         subtitle: Text('${items[index].createAt}'),
         tileColor: Colors.amber,
         trailing: IconButton(onPressed: (){
-          onDelete(customItem);
+          onDelete(items[index].id!);
 
         }, icon: Icon(Icons.delete)),
+        onTap: (){
+          Navigator.push(context, MaterialPageRoute(builder: (context) => MemoInputPage(initContent: items[index].content))).then((value) {
+            print('value $value items[index].content ${items[index].content}');
+            if(items[index].content != value){
+              print('뀨 ${items[index].id}');
+              onUpdate(MemoData(
+              id: items[index].id,
+              content: value,
+              createAt: items[index].createAt));
+            }
+          });
+        },
       );
     });
   }

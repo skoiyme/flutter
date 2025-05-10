@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 
 
 class MemoInputPage extends StatefulWidget {
-  const MemoInputPage({super.key});
+  final String? initContent;
+
+  const MemoInputPage({super.key, this.initContent});
+
 
   @override
   State<MemoInputPage> createState() => _MemoInputPageState();
@@ -16,7 +19,7 @@ class _MemoInputPageState extends State<MemoInputPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    textContoller = TextEditingController();
+    textContoller = TextEditingController(text: widget.initContent);
   }
 
 // dispose : 작업을 하고 끝난 뒤 빌렸던 공간을 반납해야되는데, 작업 끝나고 반납을 안하면 쓰레기 값이 쌓이는걸 방지
